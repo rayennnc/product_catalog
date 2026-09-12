@@ -117,7 +117,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
             child: TextField(
               controller: _searchController,
               onChanged: _onSearchChanged,
-              decoration: const InputDecoration(hintText: 'Search Character...'),
+              decoration: const InputDecoration(hintText: 'Search Product...'),
             ),
           ),
           Expanded(
