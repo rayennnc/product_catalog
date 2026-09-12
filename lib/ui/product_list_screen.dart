@@ -16,11 +16,31 @@ class _ProductListScreenState extends State<ProductListScreen> {
   ViewStatus _status = ViewStatus.loading;
   int _limit = 20;
   int _skip = 0;
+  late final ScrollController _controller;
+  bool isLoadingMore = false;
 
   @override
   void initState(){
     super.initState();
+    _controller = ScrollController();
+    _controller.addListener(_handleScroll);
     _loadProducts();
+  }
+
+  @override
+  void dispose(){
+    _controller.removeListener(_handleScroll);
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _handleScroll(){
+    final threshold = _controller.position.maxScrollExtent - 200;
+    final nearBottom = _controller.position.pixels >= threshold;
+
+    if (nearBottom && !isLoadingMore && _status == ViewStatus.success) {
+      _loadMoreProducts();
+    }
   }
   
   Future<void> _loadProducts() async {
@@ -40,6 +60,29 @@ class _ProductListScreenState extends State<ProductListScreen> {
     }
   }
 
+  Future<void> _loadMoreProducts() async {
+    setState((){
+      isLoadingMore = true;
+    });
+    try {
+      final nextLimit = _limit;
+      final nextSkip = _skip + _limit;
+
+      final results = await ProductService.fetchProducts(nextLimit, nextSkip);
+
+      setState((){
+        _skip = nextSkip;
+        _productResponse!.products.addAll(results.products);
+      });
+    } catch (e) {
+      // no need to change status
+    } finally {
+      setState((){
+        isLoadingMore = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final products = _productResponse?.products ?? [];
@@ -53,6 +96,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
       ) : _status == ViewStatus.empty ? const Center(
         child: Text('No products found')
       ) : ListView.builder(
+        controller: _controller,
         itemCount: products.length,
         itemBuilder: (content, index) {
           final product = products[index];
