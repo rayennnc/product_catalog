@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../data/product.dart';
 import '../data/product_service.dart';
+import '../ui/product_detail_screen.dart';
 
 enum ViewStatus {loading, error, empty, success}
 
@@ -14,7 +15,7 @@ class ProductListScreen extends StatefulWidget{
 class _ProductListScreenState extends State<ProductListScreen> {
   ProductResponse? _productResponse;
   ViewStatus _status = ViewStatus.loading;
-  int _limit = 20;
+  final int _limit = 20;
   int _skip = 0;
   late final ScrollController _controller;
   bool isLoadingMore = false;
@@ -101,6 +102,14 @@ class _ProductListScreenState extends State<ProductListScreen> {
         itemBuilder: (content, index) {
           final product = products[index];
           return ListTile(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ProductDetailScreen(productId: product.id),
+                ),
+              );
+            },
             title: Text(product.title),
             subtitle: Text('Price: ${product.price}'),
             leading: Image.network(product.thumbnail),
