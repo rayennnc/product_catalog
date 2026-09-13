@@ -134,7 +134,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
             ),
           ],
         ),
-      ) : _status == ViewStatus.empty ? const Center(
+      ) : _status == ViewStatus.empty || filtered.isEmpty ? const Center(
         child: Text('No products found')
       ) : ListView.builder(
         controller: _controller,
